@@ -100,6 +100,21 @@ describe('rules/disallow-unused-variables', function() {
             .to.have.no.errors();
     });
 
+    it('should not report unused variable defined with var for a ObjectPattern', function() {
+        expect(checker.checkString('var { x, y } = 1; function doXY() { return x * y; }'))
+            .to.have.no.errors();
+    }); 
+
+    it('should not report unused variable defined with let for a ObjectPattern', function() {
+        expect(checker.checkString('let { x, y } = 1; function doXY() { return x * y; }'))
+            .to.have.no.errors();
+    }); 
+
+    it('should not report unused variable defined with const for a ObjectPattern', function() {
+        expect(checker.checkString('const { x, y } = 1; function doXY() { return x * y; }'))
+            .to.have.no.errors();
+    }); 
+
     it('should report unused variable defined with var', function() {
         expect(checker.checkString('var x=1'))
             .to.contain.error('disallowUnusedVariables: Variable `x` is not used')
@@ -160,11 +175,32 @@ describe('rules/disallow-unused-variables', function() {
             .to.contain.error('disallowUnusedVariables: Variable `x` is not used')
     });
 
-    // it('should report unused variable defined with const within a class', function() {
-    //     expect(checker.checkString('class P { test() { const x=1; } }'))
-    //         .to.contain.error('disallowUnusedVariables: Variable `x` is not used')
-    // });
-    //
+    it('should report unused variable defined with const within a class', function() {
+        expect(checker.checkString('class P { test() { const x=1; } }'))
+            .to.contain.error('disallowUnusedVariables: Variable `x` is not used')
+    });
+
+    it('should report unused variable defined with var for a ObjectPattern', function() {
+        expect(checker.checkString('var { x, y } = 1;'))
+            .to.contain.error('disallowUnusedVariables: Variable `x` is not used')
+            .to.contain.error('disallowUnusedVariables: Variable `y` is not used')
+            .have.error.count.equal(2)
+    });
+
+    it('should report unused variable defined with let for a ObjectPattern', function() {
+        expect(checker.checkString('let { x, y } = 1;'))
+            .to.contain.error('disallowUnusedVariables: Variable `x` is not used')
+            .to.contain.error('disallowUnusedVariables: Variable `y` is not used')
+            .have.error.count.equal(2)
+    });
+
+    it('should report unused variable defined with const for a ObjectPattern', function() {
+        expect(checker.checkString('const { x, y } = 1;'))
+            .to.contain.error('disallowUnusedVariables: Variable `x` is not used')
+            .to.contain.error('disallowUnusedVariables: Variable `y` is not used')
+            .have.error.count.equal(2)
+    });
+
     reportAndFix({
         rules: config,
         errors: 1,
@@ -256,18 +292,40 @@ describe('rules/disallow-unused-variables', function() {
         output: 'class P { test() {} }'
     });
 
-    // reportAndFix({
-    //     rules: config,
-    //     errors: 1,
-    //     input: 'class P { test() {let x=1;} }',
-    //     output: 'class P { test() {} }'
-    // });
-    //
-    // reportAndFix({
-    //     rules: config,
-    //     errors: 1,
-    //     input: 'class P { test() {const x=1;} }',
-    //     output: 'class P { test() {} }'
-    // });
+    reportAndFix({
+        rules: config,
+        errors: 1,
+        input: 'class P { test() {let x=1;} }',
+        output: 'class P { test() {} }'
+    });
+
+    reportAndFix({
+        rules: config,
+        errors: 1,
+        input: 'class P { test() {const x=1;} }',
+        output: 'class P { test() {} }'
+    });
+
+    reportAndFix({
+        rules: config,
+        errors: 2,
+        input: 'var { x, y } = 1;',
+        output: ''
+    });
+
+    reportAndFix({
+        rules: config,
+        errors: 2,
+        input: 'let { x, y } = 1;',
+        output: ''
+    });
+
+    reportAndFix({
+        rules: config,
+        errors: 2,
+        input: 'const { x, y } = 1;',
+        output: ''
+    });
+
 });
 
